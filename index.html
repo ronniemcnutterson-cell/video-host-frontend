@@ -29,6 +29,16 @@
 <button onclick="upload()">Upload</button>
 
 <script>
+fetch("https://video-host-backend.onrender.com")
+  .then(res => res.text())
+  .then(data => {
+    document.body.innerHTML += "<p>" + data + "</p>";
+  })
+  .catch(err => console.log(err));
+</script>
+
+    
+<script>
 const API = "http://localhost:3000";
 
 async function loadVideos() {
