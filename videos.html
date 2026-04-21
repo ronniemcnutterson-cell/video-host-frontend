@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Hub</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            text-align: center;
+        }
+        video {
+            width: 80%;
+            margin: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Skumz video dump library bullshit</h1>
+
+<div id="videos"></div>
+
+<h2>Upload (restricted)</h2>
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+
+<script>
+const API = "http://localhost:3000";
+
+async function loadVideos() {
+    const res = await fetch(API + "/videos");
+    const data = await res.json();
+
+    const container = document.getElementById("videos");
+    container.innerHTML = "";
+
+    data.forEach(url => {
+        const vid = document.createElement("video");
+        vid.src = url;
+        vid.controls = true;
+        container.appendChild(vid);
+    });
+}
+
+async function upload() {
+    const file = document.getElementById("file").files[0];
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("username", username);
+    formData.append("password", password);
+
+    const res = await fetch(API + "/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    if (!res.ok) {
+        alert("Upload failed (bad login?)");
+        return;
+    }
+
+    const data = await res.json();
+
+    await fetch(API + "/save-video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: data.url })
+    });
+
+    loadVideos();
+}
+
+loadVideos();
+</script>
+
+</body>
+</html>
